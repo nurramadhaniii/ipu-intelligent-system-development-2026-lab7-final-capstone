@@ -84,7 +84,23 @@ def set_preference(user_id: str, scope: str, key: str, value: str, evidence: str
     - Always use "?" placeholders, never f-strings, in SQL.
     """
     # --- STUDENT IMPLEMENTATION START ---
-    raise NotImplementedError("TODO: implement this block")
+    user_id = _require(user_id, "user_id")
+    scope = _require(scope, "scope")
+    key = _require(key, "key")
+    value = _require(value, "value")
+    path = init_db(db_path)
+    with closing(sqlite3.connect(path)) as conn, conn:  # inner "conn" commits the transaction
+        conn.execute(
+            """
+            INSERT INTO preferences (user_id, scope, key, value, evidence, updated_at)
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(user_id, scope, key) DO UPDATE SET
+                value = excluded.value,
+                evidence = excluded.evidence,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (user_id, scope, key, value, evidence or ""),
+        )
     # --- STUDENT IMPLEMENTATION END ---
 
 
@@ -94,7 +110,13 @@ def forget_preference(user_id: str, scope: str, key: str, db_path: Optional[str]
     Other keys, scopes and users must not be affected.
     """
     # --- STUDENT IMPLEMENTATION START ---
-    raise NotImplementedError("TODO: implement this block")
+    path = init_db(db_path)
+    with closing(sqlite3.connect(path)) as conn, conn:
+        cur = conn.execute(
+            "DELETE FROM preferences WHERE user_id = ? AND scope = ? AND key = ?",
+            (user_id, scope, key),
+        )
+        return cur.rowcount > 0
     # --- STUDENT IMPLEMENTATION END ---
 
 
@@ -116,7 +138,16 @@ def tokenize(text: str) -> set:
       a single character is kept as is.
     """
     # --- STUDENT IMPLEMENTATION START ---
-    raise NotImplementedError("TODO: implement this block")
+    tokens = set()
+    for run in _TOKEN_RE.findall((text or "").lower()):
+        if re.match(rf"[{_CJK}]", run):
+            if len(run) == 1:
+                tokens.add(run)
+            else:
+                tokens.update(run[i:i + 2] for i in range(len(run) - 1))
+        elif len(run) > 1 and run not in STOPWORDS:
+            tokens.add(run)
+    return tokens
     # --- STUDENT IMPLEMENTATION END ---
 
 
@@ -129,7 +160,19 @@ def simple_keyword_rag(query: str, documents: List[str], top_k: int = 2) -> List
     - Return at most top_k documents ([] if top_k < 1 or the query has no tokens).
     """
     # --- STUDENT IMPLEMENTATION START ---
-    raise NotImplementedError("TODO: implement this block")
+    if top_k < 1:
+        return []
+    query_tokens = tokenize(query)
+    if not query_tokens:
+        return []
+    scored = []
+    for index, doc in enumerate(documents):
+        score = len(query_tokens & tokenize(doc))  # distinct shared tokens only
+        if score > 0:
+            scored.append((score, index, doc))
+    # Highest score first; ties keep the original document order.
+    scored.sort(key=lambda t: (-t[0], t[1]))
+    return [doc for _, _, doc in scored[:top_k]]
     # --- STUDENT IMPLEMENTATION END ---
 
 

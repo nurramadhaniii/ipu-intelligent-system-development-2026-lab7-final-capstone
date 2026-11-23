@@ -1,1 +1,12 @@
-[]
+[
+  {"query": "岩手の金色堂があるお寺", "expected": "Chuson-ji"},
+  {"query": "boat ride gorge iwate", "expected": "Geibikei Gorge"},
+  {"query": "盛岡の庭園", "expected": "Nanshoso"},
+  {"query": "Harry Potter theme park in Osaka", "expected": "Universal Studios Japan"},
+  {"query": "lantern gate temple Asakusa", "expected": "Senso-ji"},
+  {"query": "autumn leaves lake Aomori", "expected": "Lake Towada"},
+  {"query": "goldfish museum in Ginza", "expected": "Art Aquarium Museum GINZA"},
+  {"query": "鹿にせんべいをあげたい", "expected": "Nara Park"},
+  {"query": "富士山に登りたい", "expected": "Mount Fuji"},
+  {"query": "hiking near Kappa Bridge in Nagano", "expected": "Kamikochi"}
+]
